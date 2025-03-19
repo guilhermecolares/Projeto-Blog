@@ -3,18 +3,22 @@
     import { engine } from 'express-handlebars'
     const app = express()
     import admin from './routes/admin.js'
+    import path from 'path'
     //const mongoose = require('mongoose')
 
 // CONFIGS
-    //BODY PARSER
+    //BodyParser
     app.use(express.urlencoded({ extended: true }))
     app.use(express.json())
 
-    // HANBLEBARS
+    // Handlebars
     app.engine('handlebars', engine({ defaultLayout: 'main' }));
     app.set('view engine', 'handlebars');
 
-    // MONGOOSE
+    // Public
+    app.use(express.static(path.join(__dirname, 'public')))
+
+    // Mongoose
 
 
 // ROTAS
