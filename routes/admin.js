@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('Página do painel de ADM')
+    res.render('admin/index')
 })
 
 router.get('/posts', (req, res) => {

@@ -1,10 +1,15 @@
 // IMPORT DE BIBLIOTECAS
     import express from 'express'
     import { engine } from 'express-handlebars'
-    const app = express()
+    // PATH
+        import path from 'path'
+        import { fileURLToPath } from 'url'
     import admin from './routes/admin.js'
-    import path from 'path'
     //const mongoose = require('mongoose')
+    const app = express()
+
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = path.dirname(__filename)
 
 // CONFIGS
     //BodyParser
@@ -14,6 +19,7 @@
     // Handlebars
     app.engine('handlebars', engine({ defaultLayout: 'main' }));
     app.set('view engine', 'handlebars');
+    app.set('views', path.join(__dirname, 'views'))
 
     // Public
     app.use(express.static(path.join(__dirname, 'public')))
