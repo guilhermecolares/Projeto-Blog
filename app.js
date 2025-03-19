@@ -5,7 +5,7 @@
         import path from 'path'
         import { fileURLToPath } from 'url'
     import admin from './routes/admin.js'
-    //const mongoose = require('mongoose')
+    import mongoose from 'mongoose'
     const app = express()
 
     const __filename = fileURLToPath(import.meta.url)
@@ -24,8 +24,18 @@
     // Public
     app.use(express.static(path.join(__dirname, 'public')))
 
-    // Mongoose
+    app.use((req, res, next) => {
+        console.log('Middleware')
+        next()
+    })
 
+    // Mongoose
+    mongoose.Promise = global.Promise
+    mongoose.connect('mongodb://localhost/blog').then(() => {
+        console.log('Conectado ao Banco de Dados (MongoDB)')
+    }).catch((err) => {
+        console.log(`Houve um erro ao se conectar ao banco de dados: ${err}`)
+    })
 
 // ROTAS
     app.use('/admin', admin)
