@@ -9,12 +9,13 @@
             <small><Strong>Slug:</Strong> {{slug}}</small> <br>
             <small><strong>Data de criação:</strong> {{date}}</small> <br>
             <a href="/admin/categorias/edit/{{_id}}"><button class="btn btn-success mt-3">Editar</button></a>
-            <form action="" method="POST">
+            <form action="/admin/categorias/deletar" method="POST">
                 <input type="hidden" name="id" value="{{_id}}">
                 <button type="submit" class="btn btn-danger mt-2">Deletar</button>
             </form>
         </div>
     </div>
 {{else}}
-
+    <h4 class="alert alert-warning text-dark mt-2">Nenhuma categoria cadastrada!</h4>
 {{/each}}
+

@@ -8,9 +8,7 @@ router.get('/', (req, res) => {
     res.render('admin/index')
 })
 
-router.get('/posts', (req, res) => {
-    res.send('Pagina de Posts')
-})
+// ROTA DE CATEGORIAS
 
 router.get('/categorias', (req, res) =>{
     Categoria.find().sort({date: 'desc'}).then((categorias) => {
@@ -111,18 +109,44 @@ router.post('/categorias/deletar', (req, res) => {
     var erros = []
 
     if(!id || id == undefined || id == null) {
-        
         erros.push({texto: 'Categoria não encontrada, tente novamente!'})
+        return res.redirect('/admin/categorias')
     }
 
     if(!mongoose.Types.ObjectId.isValid(id)) {
-
+        erros.push({texto: "Categoria não encontrada, tente novamente!"})
+        return res.redirect('/admin/categorias')
     }
 
+    Categoria.findOne({_id: id}).then((categoria) => {
+        if(!categoria) {
+            erros.push({texto: 'Categoria não encontrada, tente novamente!'})
+            return res.redirect('/admin/categorias')
+        } else {
+            Categoria.deleteOne({_id: id}).then(() => {
+                req.flash('success_msg', 'Categoria deletada com sucesso!')
+                res.redirect('/admin/categorias')
+            }).catch((err) => {
+                req.flash('error_msg', 'Falha ao deletar categoria, tente novamente!')
+                res.redirect('/admin/categorias')
+            })
+        }
+    })
+})
 
+// ROTA DE POSTS
 
+router.get('/postagens', (req, res) => {
+    res.render('admin/postagens')
+})
 
-    Categoria.remove({_id: req.body.id}).then(() => {})
+router.get('/postagens/add', (req, res) => {
+    Categoria.find().then((categorias) => {
+        res.render('admin/addpostagens', {categorias})
+    }).catch((err) => {
+        req.flash('error_msg', 'Houve um erro ao carregar o formulário, tente novamente!')
+        res.redirect('/admin')
+    })
 })
 
 export default router;
