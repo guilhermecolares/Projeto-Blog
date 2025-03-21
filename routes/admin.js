@@ -206,5 +206,83 @@ router.post('/postagens/nova', (req, res) => {
     }
 })
 
+router.get('/postagens/edit/:id', (req, res) => {
+    Postagem.findOne({_id: req.params.id}).lean().then((postagem) => {
+        Categoria.find().then((categorias) => {
+            res.render('admin/editpostagens', {categorias, postagem})
+        }).catch((err) => {
+            req.flash('error_msg', 'Erro ao carregar categorias, tente novamente!')
+            res.redirect('/admin/postagens')
+        })
+    }).catch((err) => {
+        req.flash('error_msg', 'Erro ao carregar postagem, tente novamente!')
+        res.redirect('/admin/postagens')
+    })
+})
+
+router.post('/postagens/edit/:id', (req, res) => {
+    Postagem.findOne({ _id: req.params.id }).then((postagem) => {
+        if (!postagem) {
+            req.flash('error_msg', 'Postagem não encontrada!');
+            return res.redirect('/admin/postagens');
+        }
+
+        const { titulo, slug, descricao, conteudo, categoria } = req.body;
+
+        const campos = {
+            titulo: 'título',
+            slug: 'slug',
+            descricao: 'descrição',
+            conteudo: 'conteúdo',
+            categoria: 'categoria'
+        };
+
+        var erros = [];
+
+        // Verificando se os campos estão preenchidos
+        Object.keys(campos).forEach((campo) => {
+            if (!req.body[campo] || req.body[campo] == undefined || req.body[campo] == null) {
+                erros.push({ texto: `Campo ${campos[campo]} vazio!` });
+            }
+        });
+
+        if (erros.length > 0) {
+            Categoria.find().then((categorias) => {
+                req.flash('error_msg', erros.map((err) => err.texto).join(', '));
+                return res.render('admin/editpostagens', {
+                    erros,
+                    categorias,
+                    postagem: postagem,
+                    categoriaSelecionada: postagem.categoria
+                });
+            }).catch((err) => {
+                req.flash('error_msg', 'Erro ao carregar categorias');
+                res.redirect('/admin/postagens');
+            });
+        } else {
+            // Atualizando os dados da postagem existente
+            postagem.titulo = req.body.titulo;
+            postagem.slug = req.body.slug;
+            postagem.descricao = req.body.descricao;
+            postagem.conteudo = req.body.conteudo;
+            postagem.categoria = req.body.categoria;
+
+            // Salva a postagem editada
+            postagem.save().then(() => {
+                req.flash('success_msg', 'Postagem editada com sucesso!');
+                res.redirect('/admin/postagens');
+            }).catch((err) => {
+                req.flash('error_msg', 'Erro ao editar postagem, tente novamente!');
+                res.redirect('/admin/postagens');
+            });
+        }
+    }).catch((err) => {
+        req.flash('error_msg', 'Erro ao acessar postagem, tente novamente!');
+        res.redirect('/admin/postagens');
+    });
+});
+
+
+
 
 export default router;

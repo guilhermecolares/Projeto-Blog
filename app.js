@@ -1,6 +1,7 @@
 // IMPORT DE BIBLIOTECAS
     import express from 'express'
     import { engine } from 'express-handlebars'
+    import Handlebars from 'handlebars'
     // PATH
         import path from 'path'
         import { fileURLToPath } from 'url'
@@ -43,6 +44,13 @@
         }));
         app.set('view engine', 'handlebars');
         app.set('views', path.join(__dirname, 'views'));
+        Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+            if (v1.equals(v2)) {
+                return options.fn(this);
+            } else {
+                return options.inverse(this);
+            }
+        });
 
     // Public
         app.use(express.static(path.join(__dirname, 'public')))
