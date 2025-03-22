@@ -9,6 +9,8 @@
     import mongoose from 'mongoose'
     import session from 'express-session'
     import flash from 'connect-flash'
+    import Postagem from './models/Postagem.js'
+    import Categoria from './models/Categoria.js'
 
     const app = express()
 
@@ -67,9 +69,63 @@
         }).catch((err) => {
             console.log(`Houve um erro ao se conectar ao banco de dados: ${err}`)
         })
-
 // ROTAS
     app.use('/admin', admin)
+
+    app.get('/', (req, res) => {
+        Postagem.find().populate('categoria').sort({data: 'desc'}).then((postagens) => {
+            res.render('index', {postagens})
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro ao carregar as postagens, tente novamente!')
+            res.redirect('/404')
+        })
+    })
+
+    app.get('/postagens/:slug', (req, res) => {
+        Postagem.findOne({slug: req.params.slug}).then((postagem) => {
+            if (postagem) {
+                res.render('postagens/index', {postagem})
+            } else {
+                req.flash('error_msg', 'Houve um erro ao carregar a postagem, tente novamente!')
+                res.redirect('/')
+            }
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro ao carregar a postagem, tente novamente!')
+            res.redirect('/')
+        })
+    })
+
+    app.get('/404', (req, res) => {
+        res.send('Erro 404!')
+    })
+
+    app.get('/categorias', (req, res) => {
+        Categoria.find().then((categorias) => {
+            res.render('categorias/index', {categorias})
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro ao listar categorias, tente novamente!')
+            res.redirect('/')
+        })
+    })
+
+    app.get('/categorias/:slug', (req, res) => {
+        Categoria.findOne({slug: req.params.slug}).then((categoria) => {
+            if (categoria) {
+                Postagem.find({categoria: categoria._id}).then((postagens) => {
+                    res.render('categorias/postagens', {postagens, categoria})
+                }).catch((err) => {
+                    req.flash('error_msg', 'Houve um erro ao carregar as postagens, tente novamente!')
+                    res.redirect('/')
+                })
+            } else {
+                req.flash('error_msg', 'Houve um erro ao carregar a categoria, tente novamente!')
+                res.redirect('/')
+            }
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro ao carregar a págine, tente novamente!')
+            res.redirect('/')
+        })
+    })
 
 // OUTROS
     const PORT = 9091

@@ -1,0 +1,28 @@
+<div class="container mt-4">
+  <div class="bg-light p-5 rounded">
+    <h1 class="display-4">Bem-vindo ao Blog</h1>
+    <p class="lead">Blog desenvolvido com Node.js + Express + MongoDB</p>
+    <p>
+        <a href="#" class="btn btn-lg btn-primary">Crie uma conta</a>
+    </p>
+  </div>
+</div>
+
+<hr>
+
+<h2>Postagens recentes:</h2>
+
+{{#each postagens}}
+    <div class="card mt-3">
+        <div class="card-body">
+            <h3>{{titulo}}</h3>
+            <p>{{descricao}}</p>
+            <a href="/postagens/{{slug}}"><button class="btn btn-success">Leia mais...</button></a>
+            <hr>
+            <small><strong>Categoria: </strong>{{categoria.nome}}</small> <br>
+            <small><strong>Data de Publicação:</strong> {{date}}</small>
+        </div>
+    </div>
+{{else}}
+    <h5>Nenhuma postagem registrada!</h5>
+{{/each}}
