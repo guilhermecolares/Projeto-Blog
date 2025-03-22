@@ -139,7 +139,7 @@ router.post('/categorias/deletar', (req, res) => {
 
 // ROTA DE POSTS
 
-router.get('/postagens', (req, res) => {
+router.get('/postagens', (req, res) => { // LISTAR POSTAGENS
     Postagem.find().lean().populate('categoria').sort({date: 'desc'}).then((postagens) => {
         res.render('admin/postagens', { postagens })
     }).catch((err) => {
@@ -148,7 +148,7 @@ router.get('/postagens', (req, res) => {
     })
 })
 
-router.get('/postagens/add', (req, res) => {
+router.get('/postagens/add', (req, res) => { // ADICIONAR POSTAGENS
     Categoria.find().then((categorias) => {
         res.render('admin/addpostagens', {categorias})
     }).catch((err) => {
@@ -157,7 +157,7 @@ router.get('/postagens/add', (req, res) => {
     })
 })
 
-router.post('/postagens/nova', (req, res) => {
+router.post('/postagens/nova', (req, res) => { // ADICIONAR POSTAGENS
     const { titulo, slug, descricao, conteudo, categoria } = req.body
     
     const campos = { 
@@ -206,7 +206,7 @@ router.post('/postagens/nova', (req, res) => {
     }
 })
 
-router.get('/postagens/edit/:id', (req, res) => {
+router.get('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
     Postagem.findOne({_id: req.params.id}).lean().then((postagem) => {
         Categoria.find().then((categorias) => {
             res.render('admin/editpostagens', {categorias, postagem})
@@ -220,7 +220,7 @@ router.get('/postagens/edit/:id', (req, res) => {
     })
 })
 
-router.post('/postagens/edit/:id', (req, res) => {
+router.post('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
     Postagem.findOne({ _id: req.params.id }).then((postagem) => {
         if (!postagem) {
             req.flash('error_msg', 'Postagem não encontrada!');
@@ -239,7 +239,6 @@ router.post('/postagens/edit/:id', (req, res) => {
 
         var erros = [];
 
-        // Verificando se os campos estão preenchidos
         Object.keys(campos).forEach((campo) => {
             if (!req.body[campo] || req.body[campo] == undefined || req.body[campo] == null) {
                 erros.push({ texto: `Campo ${campos[campo]} vazio!` });
@@ -256,18 +255,15 @@ router.post('/postagens/edit/:id', (req, res) => {
                     categoriaSelecionada: postagem.categoria
                 });
             }).catch((err) => {
-                req.flash('error_msg', 'Erro ao carregar categorias');
+                req.flash('error_msg', 'Erro ao carregar as categorias');
                 res.redirect('/admin/postagens');
             });
         } else {
-            // Atualizando os dados da postagem existente
             postagem.titulo = req.body.titulo;
             postagem.slug = req.body.slug;
             postagem.descricao = req.body.descricao;
             postagem.conteudo = req.body.conteudo;
             postagem.categoria = req.body.categoria;
-
-            // Salva a postagem editada
             postagem.save().then(() => {
                 req.flash('success_msg', 'Postagem editada com sucesso!');
                 res.redirect('/admin/postagens');
@@ -282,7 +278,26 @@ router.post('/postagens/edit/:id', (req, res) => {
     });
 });
 
+router.post('/postagens/deletar', (req, res) => {
+    const { id } = req.body
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'Postagem nao encontrada, tente novamente!')
+        return res.redirect('/admin/postagens')
+    }
+
+        Postagem.findByIdAndDelete(id).then((postagem) => {
+            if (!postagem) {
+                req.flash('error_msg', 'Postagem nao encontrada, tente novamente!')
+                return res.redirect('/admin/postagens')
+            }
+            req.flash('success_msg', 'Postagem deletada com sucesso!')
+            res.redirect('/admin/postagens')
+        }).catch((err) => {
+            req.flash('error_msg', 'Falha ao deletar postagem, tente novamente!')
+            res.redirect('/admin/postagens')
+        })
+    })
 
 
 export default router;
