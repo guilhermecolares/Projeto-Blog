@@ -2,18 +2,20 @@ import express from 'express';
 import mongoose from 'mongoose';
 import '../models/Categoria.js'
 import '../models/Postagem.js'
+import eAdminHelper from '../helpers/eAdmin.js'
 
 const router = express.Router();
 const Categoria = mongoose.model('categorias')
 const Postagem = mongoose.model('postagens')
+const { eAdmin } = eAdminHelper
 
-router.get('/', (req, res) => {
+router.get('/', eAdmin, (req, res) => {
     res.render('admin/index')
 })
 
 // ROTA DE CATEGORIAS
 
-router.get('/categorias', (req, res) =>{
+router.get('/categorias', eAdmin, (req, res) =>{
     Categoria.find().sort({date: 'desc'}).then((categorias) => {
         res.render('admin/categorias', {categorias})
     }).catch((err) => {
@@ -22,13 +24,13 @@ router.get('/categorias', (req, res) =>{
     })
 })
 
-router.get('/categorias/add', (req, res) => {
+router.get('/categorias/add', eAdmin, (req, res) => {
     res.render('admin/addcategorias')
 })
 
-router.post('/categorias/nova', (req, res) =>{
+router.post('/categorias/nova', eAdmin, (req, res) =>{
 
-    var erros = []
+    let erros = []
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
         erros.push({texto: 'Campo "Nome" vazio!'})
@@ -60,7 +62,7 @@ router.post('/categorias/nova', (req, res) =>{
     }
 })
 
-router.get('/categorias/edit/:id', (req, res) => {
+router.get('/categorias/edit/:id', eAdmin, (req, res) => {
     Categoria.findOne({_id: req.params.id}).then((categoria) => {
         res.render('admin/editcategorias', {categoria})
     }).catch((err) => {
@@ -69,7 +71,7 @@ router.get('/categorias/edit/:id', (req, res) => {
     })  
 })
 
-router.post('/categorias/edit', (req, res) => {
+router.post('/categorias/edit', eAdmin, (req, res) => {
     Categoria.findOne({_id: req.body.id}).then((categoria) => {
         const { nome, slug } = req.body
 
@@ -106,7 +108,7 @@ router.post('/categorias/edit', (req, res) => {
     })
 })
 
-router.post('/categorias/deletar', (req, res) => {
+router.post('/categorias/deletar', eAdmin, (req, res) => {
     const { id } = req.body
     
     var erros = []
@@ -139,7 +141,7 @@ router.post('/categorias/deletar', (req, res) => {
 
 // ROTA DE POSTS
 
-router.get('/postagens', (req, res) => { // LISTAR POSTAGENS
+router.get('/postagens', eAdmin, (req, res) => { // LISTAR POSTAGENS
     Postagem.find().lean().populate('categoria').sort({date: 'desc'}).then((postagens) => {
         res.render('admin/postagens', { postagens })
     }).catch((err) => {
@@ -148,7 +150,7 @@ router.get('/postagens', (req, res) => { // LISTAR POSTAGENS
     })
 })
 
-router.get('/postagens/add', (req, res) => { // ADICIONAR POSTAGENS
+router.get('/postagens/add', eAdmin, (req, res) => { // ADICIONAR POSTAGENS
     Categoria.find().then((categorias) => {
         res.render('admin/addpostagens', {categorias})
     }).catch((err) => {
@@ -157,7 +159,7 @@ router.get('/postagens/add', (req, res) => { // ADICIONAR POSTAGENS
     })
 })
 
-router.post('/postagens/nova', (req, res) => { // ADICIONAR POSTAGENS
+router.post('/postagens/nova', eAdmin, (req, res) => { // ADICIONAR POSTAGENS
     const { titulo, slug, descricao, conteudo, categoria } = req.body
     
     const campos = { 
@@ -206,7 +208,7 @@ router.post('/postagens/nova', (req, res) => { // ADICIONAR POSTAGENS
     }
 })
 
-router.get('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
+router.get('/postagens/edit/:id', eAdmin, (req, res) => { // EDITAR POSTAGENS
     Postagem.findOne({_id: req.params.id}).lean().then((postagem) => {
         Categoria.find().then((categorias) => {
             res.render('admin/editpostagens', {categorias, postagem})
@@ -220,7 +222,7 @@ router.get('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
     })
 })
 
-router.post('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
+router.post('/postagens/edit/:id', eAdmin, (req, res) => { // EDITAR POSTAGENS
     Postagem.findOne({ _id: req.params.id }).then((postagem) => {
         if (!postagem) {
             req.flash('error_msg', 'Postagem não encontrada!');
@@ -278,7 +280,7 @@ router.post('/postagens/edit/:id', (req, res) => { // EDITAR POSTAGENS
     });
 });
 
-router.post('/postagens/deletar', (req, res) => {
+router.post('/postagens/deletar', eAdmin, (req, res) => {
     const { id } = req.body
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

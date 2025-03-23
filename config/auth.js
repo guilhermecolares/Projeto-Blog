@@ -6,29 +6,36 @@ import Usuario from '../models/Usuario.js'
 const Usuarios = mongoose.model('usuarios')
 
 export default passport => {
-    passport.use(new localAuth({usernameField: 'email'}, async (email, senha, done) => {
-        Usuarios.findOne({email}).then(usuario => {
-            if(!usuario) {
-                return done(null, false, {message: 'Esta conta nao existe!'})
+    passport.use(new localAuth({ usernameField: 'email', passwordField: 'senha' }, async (email, senha, done) => {
+        try {
+            const usuario = await Usuarios.findOne({ email })
+    
+            if (!usuario) {
+                return done(null, false, { message: 'Esta conta não existe!' })
             }
-        
-        bcrypt.compare(senha, usuario.senha, (erro, batem) => {
+    
+            const batem = await bcrypt.compare(senha, usuario.senha)
+    
             if (batem) {
                 return done(null, usuario)
             } else {
-                return done(null, false, {message: 'Senha incorreta!'})
+                return done(null, false, { message: 'Senha incorreta!' })
             }
-        })
-        })
+        } catch (err) {
+            return done(err)
+        }
     }))
 
     passport.serializeUser((usuario, done) => {
         done(null, usuario.id)
     })
 
-    passport.deserializeUser((id, done) => {
-        Usuarios.findById(id, (err, usuario) => {
-            done(err, usuario)
-        })
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const usuario = await Usuarios.findById(id)
+            done(null, usuario)
+        } catch (err) {
+            done(err, null)
+        }
     })
 }

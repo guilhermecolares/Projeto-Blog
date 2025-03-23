@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import Usuario from '../models/Usuario.js'
 import bcrypt from 'bcryptjs'
+import passport from 'passport'
 
 const router = express.Router()
 const Usuarios = mongoose.model('usuarios')
@@ -81,5 +82,25 @@ router.post('/registro', async (req, res) => {
 router.get('/login', (req, res) => {
     res.render('usuarios/login')
 })
+
+router.post('/login', async (req, res, next) => {
+    const { email, senha } = req.body
+
+
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/usuarios/login',
+        failureFlash: true
+    })(req, res, next)
+})
+
+router.get('/logout', (req, res) => {
+    req.logout((err) => {
+        if (err) { return next(err); }
+        req.flash('success_msg', 'Deslogado com sucesso!')
+        res.redirect('/')
+    })
+})
+
 
 export default router
