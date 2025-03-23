@@ -11,6 +11,7 @@
     import flash from 'connect-flash'
     import Postagem from './models/Postagem.js'
     import Categoria from './models/Categoria.js'
+    import usuarios from './routes/usuario.js'
 
     const app = express()
 
@@ -70,7 +71,7 @@
             console.log(`Houve um erro ao se conectar ao banco de dados: ${err}`)
         })
 // ROTAS
-    app.use('/admin', admin)
+    
 
     app.get('/', (req, res) => {
         Postagem.find().populate('categoria').sort({data: 'desc'}).then((postagens) => {
@@ -126,6 +127,9 @@
             res.redirect('/')
         })
     })
+
+    app.use('/admin', admin)
+    app.use('/usuarios', usuarios)
 
 // OUTROS
     const PORT = 9091
