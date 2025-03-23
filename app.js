@@ -12,6 +12,9 @@
     import Postagem from './models/Postagem.js'
     import Categoria from './models/Categoria.js'
     import usuarios from './routes/usuario.js'
+    import passport from 'passport'
+    import auth from '../config/auth.js'
+    auth(passport)
 
     const app = express()
 
@@ -25,6 +28,10 @@
             resave: true,
             saveUninitialized: true
         }))
+
+        app.use(passport.initialize())
+        app.use(passport.session())
+
         app.use(flash())
 
     // Middlewares
